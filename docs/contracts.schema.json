@@ -1,0 +1,726 @@
+{
+  "$defs": {
+    "Attachment": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "uploading",
+            "uploaded",
+            "processing",
+            "needs_review",
+            "ready",
+            "failed"
+          ],
+          "title": "State",
+          "type": "string"
+        },
+        "extraction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Extraction"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extraction_version": {
+          "title": "Extraction Version",
+          "type": "integer"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        }
+      },
+      "required": [
+        "id",
+        "state",
+        "extraction",
+        "extraction_version",
+        "error_code"
+      ],
+      "title": "Attachment",
+      "type": "object"
+    },
+    "Block": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "text": {
+          "maxLength": 50000,
+          "title": "Text",
+          "type": "string"
+        },
+        "source_kind": {
+          "default": "text",
+          "enum": [
+            "text",
+            "transcript",
+            "summary",
+            "handwriting",
+            "chat"
+          ],
+          "title": "Source Kind",
+          "type": "string"
+        },
+        "attachment_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Attachment Id"
+        },
+        "reviewed": {
+          "default": false,
+          "title": "Reviewed",
+          "type": "boolean"
+        },
+        "included": {
+          "default": true,
+          "title": "Included",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "id",
+        "text"
+      ],
+      "title": "Block",
+      "type": "object"
+    },
+    "CheckUp": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": true,
+          "title": "Metrics",
+          "type": "object"
+        },
+        "evidence_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "action": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "text",
+        "metrics",
+        "evidence_ids",
+        "status"
+      ],
+      "title": "CheckUp",
+      "type": "object"
+    },
+    "Entry": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "entry_date": {
+          "format": "date",
+          "title": "Entry Date",
+          "type": "string"
+        },
+        "draft_version": {
+          "title": "Draft Version",
+          "type": "integer"
+        },
+        "current_revision": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Current Revision"
+        },
+        "blocks": {
+          "items": {
+            "$ref": "#/$defs/Block"
+          },
+          "title": "Blocks",
+          "type": "array"
+        },
+        "attachments": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Attachments",
+          "type": "array"
+        },
+        "analysis_status": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Analysis Status"
+        },
+        "saved": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Saved"
+        }
+      },
+      "required": [
+        "id",
+        "entry_date",
+        "draft_version",
+        "current_revision",
+        "blocks",
+        "attachments",
+        "analysis_status",
+        "saved"
+      ],
+      "title": "Entry",
+      "type": "object"
+    },
+    "Evidence": {
+      "additionalProperties": false,
+      "properties": {
+        "entry_id": {
+          "format": "uuid",
+          "title": "Entry Id",
+          "type": "string"
+        },
+        "revision": {
+          "minimum": 1,
+          "title": "Revision",
+          "type": "integer"
+        },
+        "start": {
+          "minimum": 0,
+          "title": "Start",
+          "type": "integer"
+        },
+        "end": {
+          "exclusiveMinimum": 0,
+          "title": "End",
+          "type": "integer"
+        },
+        "quote": {
+          "title": "Quote",
+          "type": "string"
+        }
+      },
+      "required": [
+        "entry_id",
+        "revision",
+        "start",
+        "end",
+        "quote"
+      ],
+      "title": "Evidence",
+      "type": "object"
+    },
+    "Extraction": {
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "uncertain_spans": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Uncertain Spans",
+          "type": "array"
+        },
+        "segments": {
+          "items": {
+            "additionalProperties": true,
+            "type": "object"
+          },
+          "title": "Segments",
+          "type": "array"
+        },
+        "provider_version": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Provider Version"
+        }
+      },
+      "required": [
+        "text"
+      ],
+      "title": "Extraction",
+      "type": "object"
+    },
+    "GoalEvent": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "type": {
+          "enum": [
+            "intention",
+            "practice",
+            "milestone"
+          ],
+          "title": "Type",
+          "type": "string"
+        },
+        "review_status": {
+          "enum": [
+            "pending",
+            "confirmed",
+            "rejected"
+          ],
+          "title": "Review Status",
+          "type": "string"
+        },
+        "evidence": {
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          },
+          "title": "Evidence",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "review_status",
+        "evidence"
+      ],
+      "title": "GoalEvent",
+      "type": "object"
+    },
+    "GraphEdge": {
+      "additionalProperties": false,
+      "properties": {
+        "source": {
+          "format": "uuid",
+          "title": "Source",
+          "type": "string"
+        },
+        "target": {
+          "format": "uuid",
+          "title": "Target",
+          "type": "string"
+        },
+        "shared_entry_count": {
+          "minimum": 1,
+          "title": "Shared Entry Count",
+          "type": "integer"
+        },
+        "width": {
+          "title": "Width",
+          "type": "number"
+        }
+      },
+      "required": [
+        "source",
+        "target",
+        "shared_entry_count",
+        "width"
+      ],
+      "title": "GraphEdge",
+      "type": "object"
+    },
+    "GraphNode": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "topic",
+            "person"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "hidden": {
+          "default": false,
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y"
+        },
+        "count": {
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "share": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Share"
+        },
+        "brightness": {
+          "title": "Brightness",
+          "type": "number"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "kind",
+        "count",
+        "share",
+        "brightness"
+      ],
+      "title": "GraphNode",
+      "type": "object"
+    },
+    "GraphResponse": {
+      "additionalProperties": false,
+      "properties": {
+        "nodes": {
+          "items": {
+            "$ref": "#/$defs/GraphNode"
+          },
+          "title": "Nodes",
+          "type": "array"
+        },
+        "edges": {
+          "items": {
+            "$ref": "#/$defs/GraphEdge"
+          },
+          "title": "Edges",
+          "type": "array"
+        },
+        "total_entries": {
+          "title": "Total Entries",
+          "type": "integer"
+        },
+        "analyzed_entries": {
+          "title": "Analyzed Entries",
+          "type": "integer"
+        },
+        "pending_entries": {
+          "title": "Pending Entries",
+          "type": "integer"
+        },
+        "failed_entries": {
+          "title": "Failed Entries",
+          "type": "integer"
+        },
+        "scale": {
+          "additionalProperties": true,
+          "title": "Scale",
+          "type": "object"
+        },
+        "versions": {
+          "additionalProperties": true,
+          "title": "Versions",
+          "type": "object"
+        }
+      },
+      "required": [
+        "nodes",
+        "edges",
+        "total_entries",
+        "analyzed_entries",
+        "pending_entries",
+        "failed_entries",
+        "scale",
+        "versions"
+      ],
+      "title": "GraphResponse",
+      "type": "object"
+    },
+    "Job": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "queued",
+            "running",
+            "succeeded",
+            "failed",
+            "cancelled"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "progress_stage": {
+          "title": "Progress Stage",
+          "type": "string"
+        },
+        "result": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Result"
+        },
+        "error_code": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "title": "Error Code"
+        },
+        "attempt": {
+          "title": "Attempt",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "id",
+        "status",
+        "progress_stage",
+        "result",
+        "error_code",
+        "attempt"
+      ],
+      "title": "Job",
+      "type": "object"
+    },
+    "ReportCard": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "title": "Kind",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        },
+        "metrics": {
+          "additionalProperties": true,
+          "title": "Metrics",
+          "type": "object"
+        },
+        "evidence_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Evidence Ids",
+          "type": "array"
+        },
+        "action": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Action"
+        },
+        "status": {
+          "title": "Status",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "text",
+        "metrics",
+        "evidence_ids",
+        "status"
+      ],
+      "title": "ReportCard",
+      "type": "object"
+    },
+    "Topic": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "format": "uuid",
+          "title": "Id",
+          "type": "string"
+        },
+        "label": {
+          "title": "Label",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "topic",
+            "person"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "hidden": {
+          "default": false,
+          "title": "Hidden",
+          "type": "boolean"
+        },
+        "x": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "X"
+        },
+        "y": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Y"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "kind"
+      ],
+      "title": "Topic",
+      "type": "object"
+    }
+  },
+  "title": "Synapse shared contracts"
+}
