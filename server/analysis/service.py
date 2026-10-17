@@ -3,6 +3,7 @@
 from typing import Protocol
 import re
 from .dates import validate_date, event_date_fields
+from .resolve_topics import resolve_topics
 
 
 class Extractor(Protocol):
@@ -114,6 +115,8 @@ def analyze_entry(
                        **event_date_fields(event, entry_date),
                        "evidence_spans": _spans(event.get("evidence_spans"), text),
                        "review_status": "pending"})
+    topics = resolve_topics(topics, existing_topics, text=text,
+                            resolver=_extractor if callable(getattr(_extractor, "match_topics", None)) else None)
     return {"entry_id": entry_id, "entry_date": entry_date, "revision": revision,
-            "pipeline_version": "analysis-v2",
+            "pipeline_version": "analysis-v3",
             "passages": passages, "topics": topics, "goal_events": events}

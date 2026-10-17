@@ -5,7 +5,7 @@
 - Implemented: updated function signature with required entry date and revision, passage segmentation, exact evidence
   validation, exact topic aliases, pending goal proposals, Gemini structured
   extraction, one output-repair attempt, and provider error classification.
-- Added: ten fictional manual-review cases and 23 passing offline tests.
+- Added: ten fictional manual-review cases and 33 passing offline tests.
 - Not yet verified: live Gemini responses or extraction quality. A key is needed.
 - Added: prototype RAG question answering with four explicit retrieval strategies,
   Gemini answer generation, citations, and an embedding adapter.
@@ -56,8 +56,8 @@ The LLM extracts meaning; Python checks structure and provenance. Matching a
 quote does not prove the interpretation is correct. Negation, hypothetical,
 quotation, and prompt-injection examples in `fixtures/extraction_review.json`
 require manual live-model review. Those annotations are not claims of measured
-accuracy. Existing topics currently stay in Python for exact matching; they are
-not yet sent to Gemini for semantic matching.
+accuracy. Exact aliases resolve in Python. Unresolved general topics are compared
+with the small existing registry in two separate Gemini matching calls.
 
 For Track A startup:
 
@@ -99,10 +99,11 @@ function performs no database writes and cannot verify those conditions from
 the agreed arguments. A null topic ID is a candidate, not authorization to
 create a registry record. Hidden topics still participate in identity matching.
 
-Only unambiguous exact topic aliases resolve in this first step. People never
+Unambiguous exact topic aliases resolve first, followed by grounded semantic
+matching when the extractor supports it. People never
 resolve on name alone. Quotes establish provenance; they do not prove that a
-model interpretation is correct. Semantic identity decisions, live quality
-evaluation, embeddings, and corrections remain for subsequent steps.
+model interpretation is correct. Live semantic quality
+evaluation, embedding-based candidate retrieval, and corrections remain for subsequent steps.
 
 ## Verification
 
@@ -137,7 +138,7 @@ def analyze_entry(
     ...
 ```
 
-The result echoes entry_date and revision; pipeline_version is now analysis-v2.
+The result echoes entry_date and revision; pipeline_version is now analysis-v3.
 Track A must save these with the result and reject it if the current entry
 revision has changed. Echoing a revision alone does not enforce concurrency.
 The revision is not needed by Gemini and is not sent to it.
@@ -228,3 +229,70 @@ strategies do not require embedding calls. Live calls have not been tested here;
 provider model availability and quota depend on your account.
 
 Embedding API reference: https://ai.google.dev/api/embeddings
+
+## Extraction quality evaluation
+
+After loading .env, run:
+
+```bash
+python3 -m server.analysis.evaluate
+```
+
+This makes live Gemini calls for the ten fictional entries in
+fixtures/extraction_review.json. It checks required event types and people,
+rejects forbidden achievements, and writes evaluation/extraction_report.json
+with full analyses for inspection. An ambiguous-name case requires manual
+review rather than automatically passing. Provider errors are reported
+separately from quality failures. The command exits nonzero for either.
+The fixed reference entry date is 2026-10-17; no real journal entries are read.
+A valid quote and a passing annotation do not prove every extraction correct.
+Review extra topics, missing events, dates, and labels in the report before
+changing prompts. Reports include model and evaluation timestamp for traceability.
+
+Latest live evaluation: 8 cases passed their automated checks; f9 (ambiguous
+names) and f10 (prompt injection) received HTTP 429 rate-limit errors and remain
+unevaluated. No quality failures were observed in the eight completed cases.
+Observed label variation (Piano, Piano song, Song) reinforces the need for
+canonical topic matching next. This is not a precision or safety benchmark.
+
+After the provider quota resets, retry only the unfinished cases:
+
+```bash
+python3 -m server.analysis.evaluate --case f9 --case f10 --output evaluation/extraction_retry.json
+```
+
+## Canonical topic matching
+
+GeminiExtractor now supplies match_topics in addition to extract. The public
+analyze_entry signature is unchanged. Pipeline version is analysis-v3.
+
+1. Validate extracted labels and exact evidence spans.
+2. Reuse unambiguous exact topic labels/aliases without provider calls.
+3. For unresolved general topics, send candidate labels, evidence, the entry,
+   and the small active general-topic registry to Gemini.
+4. Make a second independent grounded decision without revealing the first.
+   Reuse an ID only if both choose the same active compatible ID. Agreement
+   is a heuristic, not proof of correct identity or a confidence score.
+5. Return the registry's canonical label. Combine mentions that resolve to one
+   ID, preserving distinct evidence spans. New/ambiguous candidates keep a null
+   topic_id; people remain candidates pending identity-aware/user resolution.
+
+Example: Playing piano and Piano practice can resolve to existing ID piano,
+label Piano. A related concept such as Music should not be merged just because
+it is related. Hidden topics still participate; merged source records do not.
+Track A must recheck redirects/aliases and user corrections in its registry lock
+before persistence. This function creates no topic IDs, aliases, or database rows.
+New candidates are not semantically clustered against one another in this step.
+
+No new configuration is needed. Gemini matching is enabled automatically by
+configure_extractor(GeminiExtractor()). Fixture extractors without match_topics
+continue to use exact matching only. Unresolved candidates plus a nonempty
+registry add two API calls per entry (batched across candidates). Provider errors
+propagate to Track A; malformed matching responses fail rather than silently
+publishing a guessed match. Large registries need embedding retrieval later.
+Goal labels are not yet canonical goals and goal-event/topic linking remains open.
+
+Tests cover paraphrase agreement, disagreement, unknown/merged IDs, person
+separation, canonical labels, evidence deduplication, and pipeline wiring.
+Live semantic quality has not been measured; previous evaluation reports use
+older pipeline versions and do not validate this new matching stage.
