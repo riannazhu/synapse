@@ -1,4 +1,78 @@
-# Synapse — Track B
+# Synapse
+
+A private journal that connects approved entries to recurring topics, evidence,
+and personal reflections. The application is intended to use real user entries,
+Supabase authentication/database/private storage, and Gemini processing. Test
+fixtures are used only in automated tests; the application does not load a sample
+journal or silently substitute mock model results.
+
+## Track A — Backend and database
+
+Implements the backend foundation from the LLD: authenticated entry/media APIs,
+PostgreSQL persistence, and a durable worker. This is implemented and tested
+locally, not yet verified against a live Supabase project or deployed end to end.
+
+```bash
+# With dependencies installed and server environment loaded:
+uvicorn server.api.app:create_app --factory --no-access-log
+python -m server.jobs.runtime.worker  # separate terminal
+```
+
+Migrations live in `database/migrations`. Configure server settings from
+`.env.example`; the Gemini adapter uses `GEMINI_MODEL=gemini-2.5-flash` and
+`HANDLER_MODULE=server.providers.gemini`. The application processes real approved
+entries; fixtures and fake provider responses are confined to tests.
+
+### Handoff to Tracks B and C
+
+- API: `/api/v1`; send a Supabase bearer token and an `Idempotency-Key` for mutations.
+- Entries: version-checked drafts, explicit approval, immutable revisions, and
+  transactional analysis enqueueing. Only selected, reviewed blocks are analyzed.
+- Media: private upload/completion/playback/deletion and extraction status/retry.
+  Uploads use authenticated API `PUT`; audio validation requires `ffprobe`.
+- Jobs: persisted leases, renewal, bounded retries, cancellation, and status APIs.
+  Completion rechecks ownership, revision, deletion, and lease token.
+- Conversations: stored messages and reviewable draft jobs; assistant messages
+  cannot support summaries, and draft generation never commits an entry.
+- Integration: B registers handlers through `HANDLER_MODULE` and graph services
+  through `SERVICE_MODULE`; C consumes the OpenAPI contract.
+  Contract files remain local pending the implementation push.
+
+The worker calls `analyze_entry(entry_id, approved_text, owner_scoped_topics,
+entry_date=..., revision=...)`. Publication rechecks aliases/redirects and
+applicable exclusions. Analysis currently lives in revision JSON; normalized
+analysis tables, embeddings, stable graph coordinates, and advanced corrections
+still need integration with B. Missing graph services return 503.
+
+The optional Gemini adapter supplies structured extraction, transcription,
+handwriting extraction, chat replies, and summaries. Server-side request budgets
+and queued retries accommodate free-tier limits without a paid-model fallback.
+Precise audio/page provenance and live provider verification remain outstanding.
+
+### Verification
+
+Install `requirements-dev.txt`, then run
+`python -m unittest discover -s tests -v`. Latest local run: **19 tests passed**,
+covering PostgreSQL persistence/isolation, idempotency, revision/lease races,
+deletion, media approval, conversation provenance, JWT checks, and Gemini adapter
+behavior. Provider responses are mocked in tests; no live quota is consumed.
+
+### Next steps and manual setup
+
+1. Create/configure Supabase Auth, run migrations `001`–`003` in order, and fill
+   in the database/storage settings in `.env`. Keep credentials server-side.
+2. Connect B's graph services and C's frontend; verify sign-in, approved entries,
+   media review, account isolation, edits, and deletion with real services/data.
+3. Complete normalized analysis persistence and topic merge/split. Shared Track D
+   still needs goal review, check-up feedback, and report persistence/routes.
+4. Deploy separate API/worker processes and configure HTTPS, origins, and retention.
+
+Detailed setup instructions remain local in `docs/track-a.md` pending the implementation push.
+Rotate keys shared in chat before deployment. Google's free tier may use submitted
+content to improve its products; disclose this before processing personal journals
+([Gemini data-use details](https://ai.google.dev/gemini-api/docs/pricing)).
+
+# Track B — Analysis
 
 Track B domain services now run against fixtures and repository interfaces. The
 five-entry offline integration covers extraction, canonical matching, worker
