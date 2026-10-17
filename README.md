@@ -35,8 +35,8 @@ entries; fixtures and fake provider responses are confined to tests.
 - Conversations: stored messages and reviewable draft jobs; assistant messages
   cannot support summaries, and draft generation never commits an entry.
 - Integration: B registers handlers through `HANDLER_MODULE` and graph services
-  through `SERVICE_MODULE`; C consumes the OpenAPI contract.
-  Contract files remain local pending the implementation push.
+  through `SERVICE_MODULE`; C consumes the [OpenAPI contract](docs/openapi.json).
+  Shared schemas are in [contracts.schema.json](docs/contracts.schema.json).
 
 The worker calls `analyze_entry(entry_id, approved_text, owner_scoped_topics,
 entry_date=..., revision=...)`. Publication rechecks aliases/redirects and
@@ -52,7 +52,7 @@ Precise audio/page provenance and live provider verification remain outstanding.
 ### Verification
 
 Install `requirements-dev.txt`, then run
-`python -m unittest discover -s tests -v`. Latest local run: **19 tests passed**,
+`python -m unittest discover -s tests -v`. Latest combined local run: **74 tests passed**,
 covering PostgreSQL persistence/isolation, idempotency, revision/lease races,
 deletion, media approval, conversation provenance, JWT checks, and Gemini adapter
 behavior. Provider responses are mocked in tests; no live quota is consumed.
@@ -67,7 +67,7 @@ behavior. Provider responses are mocked in tests; no live quota is consumed.
    still needs goal review, check-up feedback, and report persistence/routes.
 4. Deploy separate API/worker processes and configure HTTPS, origins, and retention.
 
-Detailed setup instructions remain local in `docs/track-a.md` pending the implementation push.
+See [Track A setup details](docs/track-a.md) for commands and configuration.
 Rotate keys shared in chat before deployment. Google's free tier may use submitted
 content to improve its products; disclose this before processing personal journals
 ([Gemini data-use details](https://ai.google.dev/gemini-api/docs/pricing)).
