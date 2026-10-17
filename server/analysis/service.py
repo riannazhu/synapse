@@ -2,10 +2,11 @@
 
 from typing import Protocol
 import re
+from .dates import validate_date, event_date_fields
 
 
 class Extractor(Protocol):
-    def extract(self, text: str, passages: list[dict]) -> dict:
+    def extract(self, text: str, passages: list[dict], *, entry_date: str) -> dict:
         """Return topics/events with absolute Unicode offsets and exact quotes."""
         ...
 
@@ -51,12 +52,22 @@ def _spans(value: object, text: str) -> list[dict]:
     return result
 
 
-def analyze_entry(entry_id: str, text: str, existing_topics: list) -> dict:
+def analyze_entry(
+    entry_id: str,
+    text: str,
+    existing_topics: list,
+    *,
+    entry_date: str,
+    revision: int,
+) -> dict:
     """Analyze approved text; return proposals without writing or confirming goals.
 
     existing_topics must already be restricted to the authenticated owner.
     Unmatched candidates are returned for registry reconciliation by Track A.
     """
+    validate_date(entry_date)
+    if type(revision) is not int or revision < 1:
+        raise ValueError("revision must be a positive integer")
     if not isinstance(entry_id, str) or not entry_id.strip():
         raise ValueError("entry_id must be a nonempty string")
     if not isinstance(text, str) or not text.strip() or len(text) > 50_000:
@@ -79,7 +90,7 @@ def analyze_entry(entry_id: str, text: str, existing_topics: list) -> dict:
     if _extractor is None:
         raise RuntimeError("Configure a model extractor before analyzing entries")
     passages = segment(text)
-    raw = _extractor.extract(text, passages)
+    raw = _extractor.extract(text, passages, entry_date=entry_date)
     if not isinstance(raw, dict) or any(not isinstance(raw.get(k), list) for k in ("topics", "events")):
         raise ValueError("Extraction requires topics and events lists")
     topics = []
@@ -100,7 +111,9 @@ def analyze_entry(entry_id: str, text: str, existing_topics: list) -> dict:
                 or not isinstance(event.get("goal_label"), str) or not event["goal_label"].strip()):
             raise ValueError("Invalid goal-event candidate")
         events.append({"type": event["type"], "goal_label": event["goal_label"],
+                       **event_date_fields(event, entry_date),
                        "evidence_spans": _spans(event.get("evidence_spans"), text),
                        "review_status": "pending"})
-    return {"entry_id": entry_id, "pipeline_version": "analysis-v1",
+    return {"entry_id": entry_id, "entry_date": entry_date, "revision": revision,
+            "pipeline_version": "analysis-v2",
             "passages": passages, "topics": topics, "goal_events": events}
