@@ -1,0 +1,81 @@
+{
+  "nodes": [
+    {
+      "id": "piano",
+      "label": "Piano",
+      "kind": "topic",
+      "x": 0.8331684844411157,
+      "y": 0.7734794227570119,
+      "count": 4,
+      "share": 0.8,
+      "brightness": 1.0,
+      "entry_ids": [
+        "E1",
+        "E2",
+        "E4",
+        "E5"
+      ]
+    },
+    {
+      "id": "friends",
+      "label": "Friends",
+      "kind": "topic",
+      "x": 0.6565908402185316,
+      "y": 0.8814916794868836,
+      "count": 3,
+      "share": 0.6,
+      "brightness": 0.8960148371100896,
+      "entry_ids": [
+        "E1",
+        "E3",
+        "E4"
+      ]
+    },
+    {
+      "id": "home",
+      "label": "Home",
+      "kind": "topic",
+      "x": 0.35429387822672803,
+      "y": 0.8972097030006186,
+      "count": 1,
+      "share": 0.2,
+      "brightness": 0.5730074185550448,
+      "entry_ids": [
+        "E3"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "source": "friends",
+      "target": "home",
+      "shared_entry_count": 1,
+      "width": 2.892789260714372,
+      "entry_ids": [
+        "E3"
+      ]
+    },
+    {
+      "source": "friends",
+      "target": "piano",
+      "shared_entry_count": 2,
+      "width": 4.0,
+      "entry_ids": [
+        "E1",
+        "E4"
+      ]
+    }
+  ],
+  "total_entries": 5,
+  "analyzed_entries": 5,
+  "pending_entries": 0,
+  "failed_entries": 0,
+  "share_denominator": "analyzed_entries",
+  "scale": 4,
+  "edge_scale": 2,
+  "versions": {
+    "corpus_version": 5,
+    "topic_version": 0,
+    "layout_version": 2
+  }
+}

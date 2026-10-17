@@ -13,12 +13,14 @@ class Extractor(Protocol):
 
 
 _extractor: Extractor | None = None
+_embedder = None
 
 
-def configure_extractor(extractor: Extractor) -> None:
+def configure_extractor(extractor: Extractor, *, embedder=None) -> None:
     """Configure once at server startup; providers never receive user authority."""
-    global _extractor
+    global _extractor, _embedder
     _extractor = extractor
+    _embedder = embedder
 
 
 def segment(text: str, target: int = 1200) -> list[dict]:
@@ -115,8 +117,17 @@ def analyze_entry(
                        **event_date_fields(event, entry_date),
                        "evidence_spans": _spans(event.get("evidence_spans"), text),
                        "review_status": "pending"})
-    topics = resolve_topics(topics, existing_topics, text=text,
-                            resolver=_extractor if callable(getattr(_extractor, "match_topics", None)) else None)
+    resolver = _extractor if callable(getattr(_extractor, "match_topics", None)) else None
+    if resolver is not None and _embedder is not None:
+        from server.models.embeddings import RankedResolver
+        resolver = RankedResolver(resolver, _embedder)
+    topics = resolve_topics(topics, existing_topics, text=text, resolver=resolver)
+    for event in events:
+        linked = {topic["topic_id"] for topic in topics if topic["topic_id"] is not None
+                  and topic["kind"] == "topic" and any(
+                      max(a["start"], b["start"]) < min(a["end"], b["end"])
+                      for a in topic["evidence_spans"] for b in event["evidence_spans"])}
+        event["topic_id"] = next(iter(linked)) if len(linked) == 1 else None
     return {"entry_id": entry_id, "entry_date": entry_date, "revision": revision,
-            "pipeline_version": "analysis-v3",
+            "pipeline_version": "analysis-v4",
             "passages": passages, "topics": topics, "goal_events": events}

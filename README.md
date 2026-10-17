@@ -1,130 +1,93 @@
 # Synapse — Track B
 
-## Current progress
+Track B domain services now run against fixtures and repository interfaces. The
+five-entry offline integration covers extraction, canonical matching, worker
+publication, graphs, comparison, source evidence, and capture-review outputs.
+It makes **zero API calls**. Track A's persistent backend and Track C's UI are
+not connected yet; live media/matching quality remains to be evaluated.
 
-- Implemented: updated function signature with required entry date and revision, passage segmentation, exact evidence
-  validation, exact topic aliases, pending goal proposals, Gemini structured
-  extraction, one output-repair attempt, and provider error classification.
-- Added: ten fictional manual-review cases and 33 passing offline tests.
-- Not yet verified: live Gemini responses or extraction quality. A key is needed.
-- Added: prototype RAG question answering with four explicit retrieval strategies,
-  Gemini answer generation, citations, and an embedding adapter.
-- Still to build: semantic topic matching, graph aggregation and evidence
-  lookup, Track A worker integration, and media/chat adapters.
+## Progress — October 17, 2026
 
-This step uses only Python's standard library; no pip installation is needed.
+| Milestone | Current status |
+|---|---|
+| Track A analysis interface | Implemented with required entry_date and revision; response is analysis-v4 |
+| Gemini API setup | Local .env created and a real extraction demo successfully run |
+| Live demo result | Reused Piano; separated intention from practice; returned valid evidence and dates; events stayed pending |
+| Live extraction evaluation | Nine automated case checks passed across the initial run and retry; ambiguous-name case still needs manual review |
+| Canonical matching | Exact aliases and two-decision semantic matching implemented; live matching quality not yet evaluated |
+| Five-entry analysis → graph → evidence | Working offline with hard-coded responses and zero API calls |
+| Graph features | Counts, co-mention edges, evidence, monthly trends, comparisons, stable layout, and topic corrections implemented |
+| Media and chat | Gemini adapters and offline fixtures implemented; real audio/image/chat integration not yet tested |
+| RAG | Four retrieval strategies and cited answers implemented; offline-tested, live quality not yet evaluated |
+| Worker handoff | Handler protocols and in-memory publication fixture implemented; A's persistent worker remains to integrate |
+| Verification | 59 offline tests pass; fixture evaluation has nine passes and one manual-review case |
 
-## Run the fictional example
+Live evaluation evidence is in
+[the initial report](evaluation/extraction_report.json) and
+[the retry report](evaluation/extraction_retry.json). The retry completed the
+prompt-injection check and returned the ambiguous-name example for manual review.
+These reports used analysis-v2; they do not validate the newer analysis-v4
+matching, embedding, graph, or capture implementation.
 
-1. Create your local environment file:
-   ```bash
-   cp .env.example .env
-   ```
-2. Edit `.env`, setting `GEMINI_API_KEY` to your own key. The model is configurable
-   through `GEMINI_MODEL`; the template uses `gemini-2.5-flash`. Check availability
-   and quota for your account in AI Studio.
-3. Load your locally edited environment and run:
-   ```bash
-   set -a
-   source .env
-   set +a
-   python3 -m server.analysis.demo
-   ```
+### Git progress
 
-`.env` and `.env.*` are ignored by Git; the placeholder-only `.env.example`
-is intentionally trackable. Python does not automatically load `.env`.
-Use fictional entries for free-tier development; review provider data handling
-before processing personal journals. The demo prints its fictional result.
+The latest commit recorded on both main and origin/main is `97564b9`
+(`canonical topic matching`). Earlier commits added the initial foundation
+(`530dcb5`) and Gemini extraction, dates, RAG, and environment setup (`35bf0ed`).
+The subsequent graph/capture/worker/offline-demo implementation and this README
+update are currently local changes awaiting commit and push.
 
-## How to explain this step
+### Next integration checkpoints
 
-1. Track A passes saved, approved text and owner-scoped existing topics.
-2. We preserve the original text and split it into passages with exact offsets.
-3. The Gemini adapter sends the full entry with instructions and a JSON Schema.
-   The schema defines topics, people, goal-event categories, and evidence quotes.
-   Journal content is treated as data, never system instructions.
-4. Gemini returns JSON. We parse and validate every field and find each exact
-   quote in the original text. Python calculates Unicode offsets. A zero-based
-   occurrence disambiguates repeated quotes, including overlapping matches.
-5. Invalid structure or evidence gets one regeneration attempt. Persistent
-   invalid output raises an error. Network/rate-limit errors are classified for
-   Track A's worker to retry; this adapter does not schedule retries.
-6. The analysis service rechecks spans, reuses exact unambiguous topic aliases,
-   and returns goal events with `review_status: "pending"`.
+1. Share [the analysis schema](docs/analysis.schema.json),
+   [handoff guide](docs/TRACK_B_HANDOFF.md), and generated graph fixtures with A/C.
+2. Connect one authenticated saved entry to A's worker and database, then open
+   its graph evidence in C's UI.
+3. Integrate audio, handwriting and chat through review before commit.
+4. When quota permits, evaluate real semantic matching, media fidelity, date
+   interpretation and RAG grounding; manually review ambiguous person identity.
+5. Build shared Track D check-ups, user-confirmed goals and Wrapped together.
 
-The LLM extracts meaning; Python checks structure and provenance. Matching a
-quote does not prove the interpretation is correct. Negation, hypothetical,
-quotation, and prompt-injection examples in `fixtures/extraction_review.json`
-require manual live-model review. Those annotations are not claims of measured
-accuracy. Exact aliases resolve in Python. Unresolved general topics are compared
-with the small existing registry in two separate Gemini matching calls.
+## Run without spending API quota
 
-For Track A startup:
+Python 3.10+, standard library only:
 
-```python
-from server.analysis import analyze_entry, configure_extractor
+Current verification: **59 offline tests pass**. Fixture evaluation has nine
+passing checks and one manual-review case; these are not live-model scores.
 
-from server.models.gemini import GeminiExtractor
-
-configure_extractor(GeminiExtractor())  # once at process startup
-result = analyze_entry(
-    entry_id, approved_text, existing_topics,
-    entry_date="2026-10-17", revision=1,
-)
+```bash
+python3 -m server.demo
+python3 -m server.analysis.demo
+python3 -m server.retrieval.demo
+python3 -m server.analysis.evaluate
+python3 -m unittest discover -s tests
 ```
 
-The extractor implements `extract(text, passages, *, entry_date) -> dict`. Gemini returns
-quotes and occurrences internally; the adapter converts them to the offset
-contract illustrated in `fixtures/typed_entry.json`. No extractor is silently
-selected by default.
+The full demo always forces fixture mode. Other demos default to fixtures unless
+SYNAPSE_MODEL_MODE=live is explicitly set. Evaluation requires --live to call
+Gemini, regardless of that environment variable. There is no silent fallback
+from a live error to a fixture response.
 
-## Proposed handoff to Track A
+Five-entry counts: Piano=4, Friends=3, Home=1. The first three entries reproduce
+the LLD fixture: Piano=2, Friends=2, Home=1, with Piano–Friends=1 and Friends–Home=1.
 
-The required date/revision arguments are now implemented. Track A must update
-its caller; old calls without them raise TypeError. The following dictionary fields are
-proposed for review before integration:
+## Hard-coded cases and schema examples
 
-- Input topics: `{id, label, kind: "topic" | "person", aliases?: list[str], merged_into?: str}`.
-- Output: `{entry_id, entry_date, revision, pipeline_version, passages, topics, goal_events}`.
-- Passage: `{start, end, text}`.
-- Topic assignment: `{topic_id: str | None, label, kind, evidence_spans, resolution}`.
-- Goal proposal: `{type, goal_label, event_date, date_source, evidence_spans, review_status: "pending"}`.
-- Evidence span: `{start, end, quote}`. Offsets are absolute Unicode code points,
-  with an exclusive end, into the exact approved input text.
+- fixtures/demo_journal.json: five fictional entries, fixed extraction,
+  paraphrase matches, mock audio/page tokens, and toy embedding vocabulary.
+- fixtures/extraction_review.json: ten annotated review cases.
+- fixtures/extraction_responses.json: their hard-coded model responses.
+- docs/analysis.schema.json: public response schema with a concrete examples payload.
+- fixtures/generated/: graph, comparison, evidence, timeline, capture and RAG JSON
+  for frontend development, regenerated by server.demo.
 
-Track A supplies owner-scoped topics and approved current revision text. It must
-associate results with that revision and recheck ownership, revision, deletion,
-lease token, aliases, and user overrides in its persistence transaction. This
-function performs no database writes and cannot verify those conditions from
-the agreed arguments. A null topic ID is a candidate, not authorization to
-create a registry record. Hidden topics still participate in identity matching.
+Schema examples are annotations, not model instructions. Separate fixture
+adapters serve these responses without API calls. Unknown extraction/media
+inputs fail in fixture mode. Mock media tokens are not real recordings/images;
+toy vectors are not semantic embeddings. Offline passes test plumbing, not AI
+accuracy. No real key belongs in the schema or fixtures.
 
-Unambiguous exact topic aliases resolve first, followed by grounded semantic
-matching when the extractor supports it. People never
-resolve on name alone. Quotes establish provenance; they do not prove that a
-model interpretation is correct. Live semantic quality
-evaluation, embedding-based candidate retrieval, and corrections remain for subsequent steps.
-
-## Verification
-
-Run `python3 -m unittest discover -s tests -v`.
-
-## Next steps
-
-1. Run the fictional example with your key and review the ten annotated cases.
-2. Pass a small existing-topic registry to a grounded semantic matching step.
-   Add embedding retrieval after the basic flow works.
-3. Add deterministic graph aggregation and supporting entry IDs. Give Track C
-   a sample graph, then run five entries through extraction → graph → evidence.
-4. Connect analysis handlers to Track A's worker/repository interfaces when
-   available; then add speech, handwriting, and conversational adapters.
-
-Provider credentials remain server-side. Check-ups and Wrapped belong to shared
-Track D after the typed-entry path.
-
-API reference: https://ai.google.dev/gemini-api/docs/generate-content/structured-output
-
-## Date and revision contract
+## Entry-analysis contract
 
 ```python
 def analyze_entry(
@@ -132,167 +95,157 @@ def analyze_entry(
     text: str,
     existing_topics: list,
     *,
-    entry_date: str,  # YYYY-MM-DD, user-selected journal calendar date
-    revision: int,  # positive integer identifying this approved text version
+    entry_date: str,  # YYYY-MM-DD user-selected calendar date
+    revision: int,   # positive approved-text revision
 ) -> dict:
     ...
 ```
 
-The result echoes entry_date and revision; pipeline_version is now analysis-v3.
-Track A must save these with the result and reject it if the current entry
-revision has changed. Echoing a revision alone does not enforce concurrency.
-The revision is not needed by Gemini and is not sent to it.
-
-Each goal event has event_date and date_source:
-
-| date_source | Meaning |
-|---|---|
-| explicit | A calendar date explicitly stated in the text |
-| relative | An unambiguous relative date resolved against entry_date |
-| entry_date | No clear event date; use the entry's date as a fallback |
-
-For an entry dated 2026-10-17, “Yesterday I practiced piano” should yield
-2026-10-16 with source relative. Missing or ambiguous dates fall back to
-2026-10-17. A future goal deadline is not the date the intention was expressed.
-The system does not use today's server date or need a timezone conversion for
-these calendar dates. Track A supplies the user's chosen entry_date.
-
-Python validates calendar dates and fallback consistency. Explicit/relative
-interpretations are proposed by the model, not independently verified temporal
-facts; review them against the supporting quotes during live evaluation.
-Graph date filtering uses entry_date, while the goal timeline can use event_date.
-This module returns records; Track A still owns storage and invalidation.
-
-## RAG for journal questions
-
-Entry analysis still uses analyze_entry. Questions use a separate read service:
-
 ```python
-from server.retrieval import JournalEntry, answer_question
-from server.models.rag import GeminiAnswerer, GeminiEmbedder
+from server.models.config import build_models
+from server.analysis import configure_extractor, analyze_entry
 
-result = answer_question(
-    "How have my priorities changed?",
-    entries,  # list[JournalEntry] from Track A's authorized snapshot
-    user_id=authenticated_user_id,
-    history_enabled=True,
-    strategy="broad",
-    generator=GeminiAnswerer(),
-)
+models = build_models()  # fixture by default
+configure_extractor(models.extractor, embedder=models.embedder)  # once at startup
+result = analyze_entry(entry_id, approved_text, owner_scoped_topics,
+                       entry_date="2026-10-17", revision=1)
 ```
 
-| Strategy | Retrieval | Use |
-|---|---|---|
-| broad (default) | Round-robin passages across calendar quarters and entries | How have my priorities changed? |
-| semantic | Gemini query/document embeddings and exact cosine ranking | When have I felt this way? |
-| filtered | Canonical topic IDs and half-open entry-date filters | What happened with Maya during a specific summer? |
-| counts | Distinct analyzed entry membership; no LLM | What do I mention most? |
+Only approved text and the authenticated owner's registry enter analysis.
+Existing topics have id, label, kind (topic/person), optional aliases and
+merged_into. Configure once per process; do not change the global extractor per
+request. Output version is analysis-v4: entry_id, entry_date, revision,
+pipeline_version, passages, topics, and goal_events.
 
-Pass embedder=GeminiEmbedder() for semantic retrieval. Pass topic_ids=("maya-id",),
-from_date="2026-06-01", to_date="2026-09-01" for filtered retrieval. The caller
-chooses the strategy and resolves ambiguous identities and dates; there is no
-natural-language routing or automatic interpretation of “last summer” yet.
+Topics contain nullable topic_id, canonical label, kind, resolution and
+evidence_spans. Null means unresolved/new proposal; analysis creates no IDs.
+Events contain topic_id, type (intention/practice/milestone), goal_label,
+event_date, date_source, evidence_spans and review_status=pending. Event topic
+links require overlap with exactly one resolved general topic; ambiguity stays
+null. Goal labels are proposals, not confirmed canonical goals.
 
-Broad retrieval uses a bounded sample (default 12 passages). It spreads evidence
-across quarters; when quarters exceed the budget it samples evenly through
-history. It does not guarantee full coverage or relevance to every broad
-question. Coverage metadata identifies the eligible and retrieved entry counts.
-Semantic retrieval currently embeds passages on each call: suitable for a small
-prototype, but it makes one provider request per passage plus the query. Track A
-should persist versioned passage embeddings and supply an owner-filtered vector
-repository before scaling this path. No universal similarity cutoff is assumed.
+Spans are Unicode code-point offsets with exclusive end; quotes must equal
+text[start:end]. Dates are explicit, relative to entry_date, or an entry-date
+fallback. Python validates calendar dates and fallback consistency; model
+interpretations still need review. A future deadline is not the date an
+intention was expressed. Revision checks at persistence prevent stale publication.
 
-Each returned claim cites evidence IDs. Evidence contains entry_id, revision,
-entry_date, start, end, and an exact quote sliced from approved text. Python
-rejects unknown citations. Citation validity does not prove that a claim follows
-from its sources; live grounded-answer evaluation remains necessary. Empty
-retrieval returns insufficient_evidence without calling Gemini.
+## Canonical matching and embeddings
 
-History retrieval requires history_enabled=True. The service additionally
-excludes foreign-user, deleted, unapproved, and stale revisions. Track A must
-supply authoritative current_revision/approval/deletion fields, current valid
-topic membership (excluding hidden/merged topics for visible counts), and an
-authorized consistent database snapshot. It must revalidate revisions/evidence
-before serving or persisting results if concurrent edits can occur. These Python
-checks complement authentication; callers cannot supply user identity from a
-browser request body as authority. In-memory counts must receive the complete
-filtered snapshot, not a paginated subset.
+Exact unambiguous aliases resolve first. Unresolved general topics use five
+compatible nearest topics when an embedder is configured, otherwise the small
+registry. Two grounded decisions must agree before an ID is reused. Related is
+not identical. People never merge by name; identity/user corrections are needed.
+Resolved assignments share canonical labels and combine distinct evidence.
+New unresolved candidates are not automatically clustered together.
 
-Run the fictional broad-question demo after loading .env:
+Versioned vectors reject model/dimension mismatches. Candidate vectors are cached
+within a call; persistent caching is A's integration responsibility. Agreement
+between model calls is a heuristic, not a calibrated confidence score.
+
+## Graphs and corrections
+
+GraphService consumes a copied authorized snapshot. It excludes drafts,
+deletions, foreign data, stale revisions, failed analysis, invalid spans and
+hidden topics; merged IDs follow redirects. Counts/edges use distinct entries;
+embedding similarity never creates an edge. Shares use analyzed entries,
+including entries with no topics. Empty denominators yield null.
+
+Date filters are half-open [from,to) on entry_date. Standalone views use all-time
+scales; comparison panels share IDs, coordinates and scales. supporting_entries
+returns node/edge source evidence; trend returns monthly counts/shares;
+goal_timeline returns supported dated events without inferring confirmed state.
+
+Layout is generated on write. Seeded force relaxation computes initial positions;
+new nodes use connected neighbors or an outer ring while old nodes stay fixed.
+reorganize is explicit and version checked. Date filters never rerun layout.
+
+Merge/split transforms preserve redirects, aliases and target coordinates.
+Splits require explicit mention IDs and preserve revision-bound user assignments.
+Edits flag outdated overrides for review. A commits corrections under a registry
+lock, increments versions, invalidates reports and persists new coordinates.
+
+## Capture and chat
+
+GeminiCapture supplies audio transcription, ordered handwriting extraction,
+conversation replies and editable summaries. It returns needs_review/draft,
+never saving or approving text. Audio timestamps, when returned, are validated
+against duration/order; otherwise segments is empty. Images use [illegible]
+markers and preserve page order. Large media uses temporary Gemini Files uploads
+with bounded processing waits and cleanup; cleanup failures warn without logging
+private data. A monitors/retries cleanup and renews worker leases independently.
+
+Summaries receive user statements only, with per-sentence message quote refs.
+Assistant text cannot support summary evidence. Conversation history requires
+opt-in. Exact references establish provenance, not full summary/OCR faithfulness.
+A owns private storage, upload/signature/decoded media validation and approval;
+C owns review. Provider adapters enforce the LLD byte/duration/page caps.
+
+## RAG
+
+answer_question is separate from analysis and requires history opt-in.
+
+| Strategy | Retrieval |
+|---|---|
+| broad | Bounded evidence across calendar quarters and entries |
+| semantic | Query/document embeddings and exact cosine ranking |
+| filtered | Explicit canonical topic IDs and date ranges |
+| counts | Distinct analyzed-entry membership, no LLM |
+
+The caller selects strategy and resolves ambiguous names/dates. Every generated
+claim cites retrieved source IDs; unknown citations fail and empty evidence
+abstains. Broad sampling cannot prove corpus-wide frequency or absence. Semantic
+retrieval currently embeds per request; persist owner-scoped vectors to scale it.
+
+## Worker and frontend handoff
+
+AnalysisHandler and CaptureHandler use repository protocols for A's worker.
+MemoryRepository illustrates revision/lease checks, atomic publication, alias
+reconciliation, overrides, idempotency, version bumps and refresh keys. It is a
+fixture, not durable infrastructure. A owns queue leases/retries, auth, database
+transactions, storage, invalidation and routes. See docs/TRACK_B_HANDOFF.md.
+
+For C: consume fixtures/generated/graph_three_entries.json and comparison.json.
+Edges use shared_entry_count. Render zero-count nodes as outlines; expose the
+analyzed-entry share denominator and pending/failed counts. Keep coordinates
+fixed. Evidence offsets use code points; JavaScript highlighting must account
+for UTF-16 (for example Array.from(text)).
+
+## Explicit live use
+
+Copy .env.example to .env and insert your key locally. Load it with:
 
 ```bash
-python3 -m server.retrieval.demo
+set -a
+source .env
+set +a
 ```
 
-GEMINI_EMBEDDING_MODEL is added to .env.example. Broad, filtered, and count
-strategies do not require embedding calls. Live calls have not been tested here;
-provider model availability and quota depend on your account.
-
-Embedding API reference: https://ai.google.dev/api/embeddings
-
-## Extraction quality evaluation
-
-After loading .env, run:
+Set SYNAPSE_MODEL_MODE=live for live demos, or pass live to build_models. The full
+server.demo stays offline. To evaluate real extraction explicitly:
 
 ```bash
-python3 -m server.analysis.evaluate
+python3 -m server.analysis.evaluate --live
 ```
 
-This makes live Gemini calls for the ten fictional entries in
-fixtures/extraction_review.json. It checks required event types and people,
-rejects forbidden achievements, and writes evaluation/extraction_report.json
-with full analyses for inspection. An ambiguous-name case requires manual
-review rather than automatically passing. Provider errors are reported
-separately from quality failures. The command exits nonzero for either.
-The fixed reference entry date is 2026-10-17; no real journal entries are read.
-A valid quote and a passing annotation do not prove every extraction correct.
-Review extra topics, missing events, dates, and labels in the report before
-changing prompts. Reports include model and evaluation timestamp for traceability.
+Select cases with --case f9 --case f10; customize --output if needed. Default
+reports are evaluation/extraction_fixture.json and extraction_live.json. The
+initial live run passed eight cases and rate-limited two; the saved retry added
+one pass and one manual-review case. Those analysis-v2 results do not evaluate
+the newer matching/media pipeline. The latest implementation step used no live calls.
+Use fictional journals until provider privacy/retention is suitable for personal
+entries. Actual model availability and quota depend on your account.
 
-Latest live evaluation: 8 cases passed their automated checks; f9 (ambiguous
-names) and f10 (prompt injection) received HTTP 429 rate-limit errors and remain
-unevaluated. No quality failures were observed in the eight completed cases.
-Observed label variation (Piano, Piano song, Song) reinforces the need for
-canonical topic matching next. This is not a precision or safety benchmark.
+## Remaining integration
 
-After the provider quota resets, retry only the unfinished cases:
+A/C must connect and validate an authenticated save → analyze → graph → evidence
+flow, followed by real audio/image/chat review. Live extraction, person identity,
+semantic matching, date interpretation, and media faithfulness need evaluation.
+The LLD requires downstream use before a track is complete. Check-ups, confirmed
+goal transitions, and Wrapped remain shared Track D, using these metrics,
+proposals and evidence. No custom ML training is included or required.
 
-```bash
-python3 -m server.analysis.evaluate --case f9 --case f10 --output evaluation/extraction_retry.json
-```
-
-## Canonical topic matching
-
-GeminiExtractor now supplies match_topics in addition to extract. The public
-analyze_entry signature is unchanged. Pipeline version is analysis-v3.
-
-1. Validate extracted labels and exact evidence spans.
-2. Reuse unambiguous exact topic labels/aliases without provider calls.
-3. For unresolved general topics, send candidate labels, evidence, the entry,
-   and the small active general-topic registry to Gemini.
-4. Make a second independent grounded decision without revealing the first.
-   Reuse an ID only if both choose the same active compatible ID. Agreement
-   is a heuristic, not proof of correct identity or a confidence score.
-5. Return the registry's canonical label. Combine mentions that resolve to one
-   ID, preserving distinct evidence spans. New/ambiguous candidates keep a null
-   topic_id; people remain candidates pending identity-aware/user resolution.
-
-Example: Playing piano and Piano practice can resolve to existing ID piano,
-label Piano. A related concept such as Music should not be merged just because
-it is related. Hidden topics still participate; merged source records do not.
-Track A must recheck redirects/aliases and user corrections in its registry lock
-before persistence. This function creates no topic IDs, aliases, or database rows.
-New candidates are not semantically clustered against one another in this step.
-
-No new configuration is needed. Gemini matching is enabled automatically by
-configure_extractor(GeminiExtractor()). Fixture extractors without match_topics
-continue to use exact matching only. Unresolved candidates plus a nonempty
-registry add two API calls per entry (batched across candidates). Provider errors
-propagate to Track A; malformed matching responses fail rather than silently
-publishing a guessed match. Large registries need embedding retrieval later.
-Goal labels are not yet canonical goals and goal-event/topic linking remains open.
-
-Tests cover paraphrase agreement, disagreement, unknown/merged IDs, person
-separation, canonical labels, evidence deduplication, and pipeline wiring.
-Live semantic quality has not been measured; previous evaluation reports use
-older pipeline versions and do not validate this new matching stage.
+Provider references: [structured output](https://ai.google.dev/gemini-api/docs/generate-content/structured-output),
+[embeddings](https://ai.google.dev/api/embeddings),
+[audio/media](https://ai.google.dev/gemini-api/docs/generate-content/audio),
+[Files API](https://ai.google.dev/api/files).

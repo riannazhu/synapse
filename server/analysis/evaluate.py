@@ -5,7 +5,8 @@ import json
 from pathlib import Path
 
 from server.analysis import analyze_entry, configure_extractor
-from server.models.gemini import GeminiExtractor, ProviderError
+from server.models.gemini import ProviderError
+from server.models.config import build_models
 
 
 def check_case(case, result):
@@ -47,9 +48,10 @@ def run(cases, analyze):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--output", default="evaluation/extraction_report.json")
+    parser.add_argument("--output", help="Report path; defaults to separate live/fixture reports")
     parser.add_argument("--case", action="append", dest="case_ids",
                         help="Run only this case ID; repeat to select multiple cases")
+    parser.add_argument("--live", action="store_true", help="Explicitly spend Gemini quota; default uses hard-coded responses")
     args = parser.parse_args()
     cases = json.loads((Path(__file__).resolve().parents[2] / "fixtures/extraction_review.json").read_text())
     if args.case_ids:
@@ -57,13 +59,13 @@ def main():
         if unknown:
             parser.error("Unknown case IDs: " + ", ".join(sorted(unknown)))
         cases = [case for case in cases if case["id"] in args.case_ids]
-    extractor = GeminiExtractor()
+    extractor = build_models("live" if args.live else "fixture").extractor
     configure_extractor(extractor)
     report = run(cases, analyze_entry)
-    report.update(model=extractor.model, pipeline_version="analysis-v3",
+    report.update(model=extractor.model, pipeline_version="analysis-v4", mode="live" if args.live else "fixture",
                   evaluated_at=datetime.now(timezone.utc).isoformat(),
                   limitations="Small fictional set. Passing annotations do not prove complete correctness. Review full analyses.")
-    output = Path(args.output)
+    output = Path(args.output or ("evaluation/extraction_live.json" if args.live else "evaluation/extraction_fixture.json"))
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report["summary"]))

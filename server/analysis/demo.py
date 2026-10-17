@@ -2,15 +2,17 @@
 import json
 
 from server.analysis import analyze_entry, configure_extractor
-from server.models.gemini import GeminiExtractor
+from server.models.config import build_models
+from server.models.fixtures import load_fixture
 
 
 def main():
-    configure_extractor(GeminiExtractor())
+    models = build_models()
+    configure_extractor(models.extractor, embedder=models.embedder)
+    entry = load_fixture()["entries"][0]
     result = analyze_entry(
-        "fictional-entry-1", "I want to learn piano. Today I practiced piano for twenty minutes.",
-        [{"id": "piano", "label": "Piano", "kind": "topic", "aliases": []}],
-        entry_date="2026-10-17", revision=1,
+        entry["id"], entry["text"], load_fixture()["topics"],
+        entry_date=entry["entry_date"], revision=entry["revision"],
     )
     print(json.dumps(result, indent=2))
 

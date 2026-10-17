@@ -1,0 +1,52 @@
+[
+  {
+    "id": "E1",
+    "user_id": "fictional-user",
+    "revision": 1,
+    "entry_date": "2025-01-10",
+    "text": "I want to learn piano. I talked with friends about piano.",
+    "approved": true,
+    "analysis_status": "succeeded",
+    "pipeline_version": "analysis-v4"
+  },
+  {
+    "id": "E2",
+    "user_id": "fictional-user",
+    "revision": 1,
+    "entry_date": "2025-02-12",
+    "text": "Today I practiced piano for twenty minutes.",
+    "approved": true,
+    "analysis_status": "succeeded",
+    "pipeline_version": "analysis-v4"
+  },
+  {
+    "id": "E3",
+    "user_id": "fictional-user",
+    "revision": 1,
+    "entry_date": "2025-03-14",
+    "text": "I invited friends to my home.",
+    "approved": true,
+    "analysis_status": "succeeded",
+    "pipeline_version": "analysis-v4"
+  },
+  {
+    "id": "E4",
+    "user_id": "fictional-user",
+    "revision": 1,
+    "entry_date": "2026-01-08",
+    "text": "I want to learn piano. I am making time for friends.",
+    "approved": true,
+    "analysis_status": "succeeded",
+    "pipeline_version": "analysis-v4"
+  },
+  {
+    "id": "E5",
+    "user_id": "fictional-user",
+    "revision": 1,
+    "entry_date": "2026-02-09",
+    "text": "Today I played my first complete song on piano.",
+    "approved": true,
+    "analysis_status": "succeeded",
+    "pipeline_version": "analysis-v4"
+  }
+]

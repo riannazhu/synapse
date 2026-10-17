@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Synapse Track B analysis response v4",
+  "type": "object",
+  "required": [
+    "entry_id",
+    "entry_date",
+    "revision",
+    "pipeline_version",
+    "passages",
+    "topics",
+    "goal_events"
+  ],
+  "properties": {
+    "entry_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "entry_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "revision": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "pipeline_version": {
+      "const": "analysis-v4"
+    },
+    "passages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "start",
+          "end",
+          "text"
+        ],
+        "properties": {
+          "start": {
+            "type": "integer"
+          },
+          "end": {
+            "type": "integer"
+          },
+          "text": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "topics": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/topic"
+      }
+    },
+    "goal_events": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/event"
+      }
+    }
+  },
+  "$defs": {
+    "span": {
+      "type": "object",
+      "required": [
+        "start",
+        "end",
+        "quote"
+      ],
+      "properties": {
+        "start": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "end": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "quote": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "topic": {
+      "type": "object",
+      "required": [
+        "topic_id",
+        "label",
+        "kind",
+        "evidence_spans",
+        "resolution"
+      ],
+      "properties": {
+        "topic_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "label": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "topic",
+            "person"
+          ]
+        },
+        "evidence_spans": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/span"
+          }
+        },
+        "resolution": {
+          "enum": [
+            "exact_alias",
+            "semantic_confirmed",
+            "candidate",
+            "user"
+          ]
+        }
+      }
+    },
+    "event": {
+      "type": "object",
+      "required": [
+        "topic_id",
+        "type",
+        "goal_label",
+        "event_date",
+        "date_source",
+        "evidence_spans",
+        "review_status"
+      ],
+      "properties": {
+        "topic_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "type": {
+          "enum": [
+            "intention",
+            "practice",
+            "milestone"
+          ]
+        },
+        "goal_label": {
+          "type": "string"
+        },
+        "event_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "date_source": {
+          "enum": [
+            "explicit",
+            "relative",
+            "entry_date"
+          ]
+        },
+        "evidence_spans": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/span"
+          }
+        },
+        "review_status": {
+          "const": "pending"
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "entry_id": "E1",
+      "entry_date": "2025-01-10",
+      "revision": 1,
+      "pipeline_version": "analysis-v4",
+      "passages": [
+        {
+          "start": 0,
+          "end": 57,
+          "text": "I want to learn piano. I talked with friends about piano."
+        }
+      ],
+      "topics": [
+        {
+          "topic_id": "piano",
+          "label": "Piano",
+          "kind": "topic",
+          "evidence_spans": [
+            {
+              "start": 16,
+              "end": 21,
+              "quote": "piano"
+            }
+          ],
+          "resolution": "exact_alias"
+        },
+        {
+          "topic_id": "friends",
+          "label": "Friends",
+          "kind": "topic",
+          "evidence_spans": [
+            {
+              "start": 37,
+              "end": 44,
+              "quote": "friends"
+            }
+          ],
+          "resolution": "exact_alias"
+        }
+      ],
+      "goal_events": [
+        {
+          "type": "intention",
+          "goal_label": "Learn piano",
+          "event_date": "2025-01-10",
+          "date_source": "entry_date",
+          "evidence_spans": [
+            {
+              "start": 0,
+              "end": 22,
+              "quote": "I want to learn piano."
+            }
+          ],
+          "review_status": "pending",
+          "topic_id": "piano"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,74 @@
+{
+  "status": "ok",
+  "strategy": "broad",
+  "claims": [
+    {
+      "text": "Fictional source: I want to learn piano. I talked with friends about piano.",
+      "evidence_ids": [
+        "source-1"
+      ]
+    },
+    {
+      "text": "Fictional source: I want to learn piano. I am making time for friends.",
+      "evidence_ids": [
+        "source-2"
+      ]
+    }
+  ],
+  "evidence": [
+    {
+      "id": "source-1",
+      "entry_id": "E1",
+      "revision": 1,
+      "entry_date": "2025-01-10",
+      "start": 0,
+      "end": 57,
+      "quote": "I want to learn piano. I talked with friends about piano."
+    },
+    {
+      "id": "source-2",
+      "entry_id": "E4",
+      "revision": 1,
+      "entry_date": "2026-01-08",
+      "start": 0,
+      "end": 52,
+      "quote": "I want to learn piano. I am making time for friends."
+    },
+    {
+      "id": "source-3",
+      "entry_id": "E2",
+      "revision": 1,
+      "entry_date": "2025-02-12",
+      "start": 0,
+      "end": 43,
+      "quote": "Today I practiced piano for twenty minutes."
+    },
+    {
+      "id": "source-4",
+      "entry_id": "E5",
+      "revision": 1,
+      "entry_date": "2026-02-09",
+      "start": 0,
+      "end": 47,
+      "quote": "Today I played my first complete song on piano."
+    },
+    {
+      "id": "source-5",
+      "entry_id": "E3",
+      "revision": 1,
+      "entry_date": "2025-03-14",
+      "start": 0,
+      "end": 29,
+      "quote": "I invited friends to my home."
+    }
+  ],
+  "coverage": {
+    "eligible_entries": 5,
+    "retrieved_entries": 5,
+    "available_quarters": [
+      "2025-Q1",
+      "2026-Q1"
+    ],
+    "sampled": true
+  }
+}

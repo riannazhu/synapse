@@ -1,7 +1,7 @@
 """Fictional RAG example: python3 -m server.retrieval.demo."""
 import json
 from server.retrieval import JournalEntry, answer_question
-from server.models.rag import GeminiAnswerer
+from server.models.config import build_models
 
 
 if __name__ == "__main__":
@@ -14,5 +14,5 @@ if __name__ == "__main__":
     ]
     print(json.dumps(answer_question(
         "How have my priorities changed?", entries, user_id="fictional-user",
-        history_enabled=True, strategy="broad", generator=GeminiAnswerer(),
+        history_enabled=True, strategy="broad", generator=build_models().answerer,
     ), indent=2))

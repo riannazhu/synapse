@@ -1,0 +1,260 @@
+{
+  "fictional": true,
+  "user_id": "fictional-user",
+  "topics": [
+    {
+      "id": "piano",
+      "user_id": "fictional-user",
+      "label": "Piano",
+      "kind": "topic",
+      "aliases": []
+    },
+    {
+      "id": "friends",
+      "user_id": "fictional-user",
+      "label": "Friends",
+      "kind": "topic",
+      "aliases": []
+    },
+    {
+      "id": "home",
+      "user_id": "fictional-user",
+      "label": "Home",
+      "kind": "topic",
+      "aliases": []
+    }
+  ],
+  "entries": [
+    {
+      "id": "E1",
+      "user_id": "fictional-user",
+      "revision": 1,
+      "entry_date": "2025-01-10",
+      "text": "I want to learn piano. I talked with friends about piano.",
+      "approved": true,
+      "analysis_status": "queued",
+      "extraction": {
+        "topics": [
+          {
+            "label": "Piano",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 16,
+                "end": 21,
+                "quote": "piano"
+              }
+            ]
+          },
+          {
+            "label": "Friends",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 37,
+                "end": 44,
+                "quote": "friends"
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "type": "intention",
+            "goal_label": "Learn piano",
+            "event_date": "2025-01-10",
+            "date_source": "entry_date",
+            "evidence_spans": [
+              {
+                "start": 0,
+                "end": 22,
+                "quote": "I want to learn piano."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "E2",
+      "user_id": "fictional-user",
+      "revision": 1,
+      "entry_date": "2025-02-12",
+      "text": "Today I practiced piano for twenty minutes.",
+      "approved": true,
+      "analysis_status": "queued",
+      "extraction": {
+        "topics": [
+          {
+            "label": "Playing piano",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 18,
+                "end": 23,
+                "quote": "piano"
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "type": "practice",
+            "goal_label": "Learn piano",
+            "event_date": "2025-02-12",
+            "date_source": "relative",
+            "evidence_spans": [
+              {
+                "start": 0,
+                "end": 43,
+                "quote": "Today I practiced piano for twenty minutes."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "E3",
+      "user_id": "fictional-user",
+      "revision": 1,
+      "entry_date": "2025-03-14",
+      "text": "I invited friends to my home.",
+      "approved": true,
+      "analysis_status": "queued",
+      "extraction": {
+        "topics": [
+          {
+            "label": "Friends",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 10,
+                "end": 17,
+                "quote": "friends"
+              }
+            ]
+          },
+          {
+            "label": "Home",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 24,
+                "end": 28,
+                "quote": "home"
+              }
+            ]
+          }
+        ],
+        "events": []
+      }
+    },
+    {
+      "id": "E4",
+      "user_id": "fictional-user",
+      "revision": 1,
+      "entry_date": "2026-01-08",
+      "text": "I want to learn piano. I am making time for friends.",
+      "approved": true,
+      "analysis_status": "queued",
+      "extraction": {
+        "topics": [
+          {
+            "label": "Piano practice",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 16,
+                "end": 21,
+                "quote": "piano"
+              }
+            ]
+          },
+          {
+            "label": "Friends",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 44,
+                "end": 51,
+                "quote": "friends"
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "type": "intention",
+            "goal_label": "Learn piano",
+            "event_date": "2026-01-08",
+            "date_source": "entry_date",
+            "evidence_spans": [
+              {
+                "start": 0,
+                "end": 22,
+                "quote": "I want to learn piano."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "E5",
+      "user_id": "fictional-user",
+      "revision": 1,
+      "entry_date": "2026-02-09",
+      "text": "Today I played my first complete song on piano.",
+      "approved": true,
+      "analysis_status": "queued",
+      "extraction": {
+        "topics": [
+          {
+            "label": "Piano",
+            "kind": "topic",
+            "evidence_spans": [
+              {
+                "start": 41,
+                "end": 46,
+                "quote": "piano"
+              }
+            ]
+          }
+        ],
+        "events": [
+          {
+            "type": "milestone",
+            "goal_label": "Learn piano",
+            "event_date": "2026-02-09",
+            "date_source": "relative",
+            "evidence_spans": [
+              {
+                "start": 0,
+                "end": 47,
+                "quote": "Today I played my first complete song on piano."
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "semantic_matches": {
+    "Playing piano": "piano",
+    "Piano practice": "piano"
+  },
+  "capture": {
+    "audio_token": "fixture-audio:E5",
+    "audio_text": "Today I played my first complete song on piano.",
+    "page_token": "fixture-page:E1",
+    "page_text": "I want to learn piano. I talked with friends about piano."
+  },
+  "embedding_vocabulary": [
+    "piano",
+    "friends",
+    "home",
+    "career",
+    "practice"
+  ]
+}

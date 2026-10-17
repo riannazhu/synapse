@@ -1,0 +1,45 @@
+[
+  {
+    "id": "audio",
+    "state": "needs_review",
+    "result": {
+      "text": "Today I played my first complete song on piano.",
+      "segments": [],
+      "uncertain_spans": [],
+      "provider_version": "fixture-v1-not-semantic",
+      "state": "needs_review"
+    }
+  },
+  {
+    "id": "page",
+    "state": "needs_review",
+    "result": {
+      "pages": [
+        {
+          "page": 1,
+          "text": "I want to learn piano. I talked with friends about piano.",
+          "uncertain_spans": []
+        }
+      ],
+      "provider_version": "fixture-v1-not-semantic",
+      "state": "needs_review"
+    }
+  },
+  {
+    "id": "chat",
+    "state": "needs_review",
+    "result": {
+      "draft_text": "Today I practiced piano for twenty minutes.",
+      "source_refs": [
+        {
+          "start": 0,
+          "end": 43,
+          "message_id": "u1",
+          "quote": "Today I practiced piano for twenty minutes."
+        }
+      ],
+      "state": "needs_review",
+      "provider_version": "fixture-v1-not-semantic"
+    }
+  }
+]

@@ -1,0 +1,78 @@
+[
+  {
+    "entry_id": "E1",
+    "revision": 1,
+    "entry_date": "2025-01-10",
+    "evidence": [
+      {
+        "id": "e0945ec5-2c43-5523-bf2a-18b47e8be086",
+        "user_id": "fictional-user",
+        "entry_id": "E1",
+        "revision": 1,
+        "topic_id": "piano",
+        "start": 16,
+        "end": 21,
+        "quote": "piano",
+        "assignment_source": "model",
+        "passage_id": "50468af4-6c8f-52ce-9414-8e0fdbfab3e4"
+      }
+    ]
+  },
+  {
+    "entry_id": "E2",
+    "revision": 1,
+    "entry_date": "2025-02-12",
+    "evidence": [
+      {
+        "id": "bd4209d3-e925-5da6-881d-3e329ec5bc0f",
+        "user_id": "fictional-user",
+        "entry_id": "E2",
+        "revision": 1,
+        "topic_id": "piano",
+        "start": 18,
+        "end": 23,
+        "quote": "piano",
+        "assignment_source": "model",
+        "passage_id": "35ad5655-17af-54f3-9652-0f75ebc3024d"
+      }
+    ]
+  },
+  {
+    "entry_id": "E4",
+    "revision": 1,
+    "entry_date": "2026-01-08",
+    "evidence": [
+      {
+        "id": "fbe0a2ac-3372-53a8-9ecc-317b2e9e6ed4",
+        "user_id": "fictional-user",
+        "entry_id": "E4",
+        "revision": 1,
+        "topic_id": "piano",
+        "start": 16,
+        "end": 21,
+        "quote": "piano",
+        "assignment_source": "model",
+        "passage_id": "34371817-1ae6-5c23-bfdb-2a26245c70ca"
+      }
+    ]
+  },
+  {
+    "entry_id": "E5",
+    "revision": 1,
+    "entry_date": "2026-02-09",
+    "evidence": [
+      {
+        "id": "b9dc8250-5345-5b99-b431-53e91356cdcf",
+        "user_id": "fictional-user",
+        "entry_id": "E5",
+        "revision": 1,
+        "topic_id": "piano",
+        "start": 41,
+        "end": 46,
+        "quote": "piano",
+        "assignment_source": "model",
+        "passage_id": "43e51a54-2dd4-532e-93bd-1cc44acf8de1"
+      }
+    ]
+  }
+]
