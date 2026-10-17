@@ -1,10 +1,32 @@
-# Synapse — Track B
+# Synapse — Tracks B and C
+
+Track C has started: the React/TypeScript frontend in [web](web/README.md) now
+runs against Track B's fictional fixtures. It includes the dashboard, journal,
+four-mode composer, an interactive neuron map inspired by the supplied images,
+source evidence, and synchronized date comparisons. Local drafts and saves stay
+in this browser. Live authentication, uploads, jobs, and analysis await Track A.
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Frontend verification: 15 domain/storage/3D geometry tests and five Chrome browser checks
+pass, and the production build passes TypeScript checking. The mobile browser
+check covers journal editing, stale-evidence removal and horizontal overflow.
+See [frontend setup and remaining work](web/README.md).
+
+The map now has an interactive 3D brain: drag to rotate, two-finger scroll to
+pan, and pinch to zoom. Topic markers and co-mention connections open their
+evidence; date filters preserve the camera and stable topic anchors.
 
 Track B domain services now run against fixtures and repository interfaces. The
 five-entry offline integration covers extraction, canonical matching, worker
 publication, graphs, comparison, source evidence, and capture-review outputs.
-It makes **zero API calls**. Track A's persistent backend and Track C's UI are
-not connected yet; live media/matching quality remains to be evaluated.
+It makes **zero API calls**. Track C now consumes the fictional fixtures; Track
+A's persistent backend is not connected. Live media/matching quality remains
+to be evaluated.
 
 ## Progress — October 17, 2026
 
@@ -20,6 +42,7 @@ not connected yet; live media/matching quality remains to be evaluated.
 | Media and chat | Gemini adapters and offline fixtures implemented; real audio/image/chat integration not yet tested |
 | RAG | Four retrieval strategies and cited answers implemented; offline-tested, live quality not yet evaluated |
 | Worker handoff | Handler protocols and in-memory publication fixture implemented; A's persistent worker remains to integrate |
+| Track C frontend | Local React/TypeScript prototype implemented against B's fixtures; live backend integration remains |
 | Verification | 59 offline tests pass; fixture evaluation has nine passes and one manual-review case |
 
 Live evaluation evidence is in
